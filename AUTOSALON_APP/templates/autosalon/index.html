@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Дом на Волге</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Шапка (как на скрине 1) -->
+    <header class="header">
+        <div class="logo">🏠 Дом на Волге</div>
+        <nav>
+            <a href="#">Главная</a>
+            <a href="#">Объекты</a>
+            <a href="#">Агенты</a>
+            <a href="#">Контакты</a>
+        </nav>
+        <div class="contact">+7 (831) 000-00-00</div>
+    </header>
+
+    <!-- Баннер с поиском -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Найдите свой<br>дом на Волге</h1>
+            <p>Квартиры в Нижнем Новгороде, дома и участки в Богородском районе.</p>
+            
+            <!-- Форма поиска (визуальная часть) -->
+            <div class="search-bar">
+                <input type="text" id="search-district" placeholder="Район или адрес">
+                <select id="search-type">
+                    <option value="">Любой тип</option>
+                    <option value="flat">Квартира</option>
+                    <option value="house">Дом</option>
+                </select>
+                <button onclick="loadProperties()">Найти</button>
+            </div>
+        </div>
+        <div class="hero-image">
+            <!-- Сюда можно поставить фоновое фото дома -->
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3" alt="Дом">
+        </div>
+    </section>
+
+    <!-- Каталог объектов (как на скрине 2) -->
+    <section class="catalog">
+        <h2>Каталог объектов</h2>
+        <div class="filters">
+            <!-- Фильтры можно дублировать здесь -->
+             <span id="result-count">Найдено объектов: ...</span>
+        </div>
+
+        <div class="grid" id="property-grid">
+            <!-- Сюда JS будет вставлять карточки -->
+        </div>
+    </section>
+
+    <!-- Модальное окно заявки -->
+    <div id="request-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Записаться на просмотр</h3>
+            <form id="request-form">
+                <input type="hidden" id="prop-id" name="property">
+                <input type="text" id="name" placeholder="Ваше имя" required>
+                <input type="tel" id="phone" placeholder="Телефон" required>
+                <button type="submit">Отправить</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

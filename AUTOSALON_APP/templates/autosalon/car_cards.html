@@ -1,0 +1,44 @@
+{% if cars %}
+    {% for car in cars %}
+    <article class="car-card">
+        <div class="car-image-wrap">
+            {% if car.image %}
+                <img src="{{ car.image.url }}" alt="{{ car.brand.name }} {{ car.model_name }}">
+            {% else %}
+                <div class="car-image-placeholder">NO IMAGE</div>
+            {% endif %}
+            <span class="car-card-id">ID #{{ car.id }}</span>
+        </div>
+
+        <div class="car-body">
+            <div class="car-title">
+                <span class="car-brand">{{ car.brand.name }}</span><br>
+                {{ car.model_name }}
+            </div>
+
+            <div class="car-specs">
+                <div class="car-spec-row">
+                    <span class="car-spec-key">Год</span>
+                    <span class="car-spec-value">{{ car.year }}</span>
+                </div>
+                <div class="car-spec-row">
+                    <span class="car-spec-key">Цвет</span>
+                    <span class="car-spec-value">{{ car.color }}</span>
+                </div>
+                <div class="car-spec-row">
+                    <span class="car-spec-key">Статус</span>
+                    <span class="car-spec-value">
+                        <span class="status-badge status-{{ car.status }}">{{ car.get_status_display }}</span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="car-price">{{ car.price }} ₽</div>
+        </div>
+    </article>
+    {% endfor %}
+{% else %}
+    <div class="hud-empty" style="grid-column: 1 / -1;">
+        // БАЗА ДАННЫХ ПУСТА — ДОБАВЬ АВТОМОБИЛИ В АДМИНКЕ
+    </div>
+{% endif %}
