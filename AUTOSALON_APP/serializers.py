@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import Brand, Car, Order, Employee, TestDrive
 
-# Твои старые сериализаторы (обрати внимание: без буквы S на конце!)
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
@@ -20,7 +19,6 @@ class CarSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at']
 
-# НОВЫЕ сериализаторы
 class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee

@@ -1,14 +1,12 @@
 from django.contrib import admin
 from .models import Brand, Car, Order, Employee, TestDrive
 
-
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'country', 'created_at')
     search_fields = ('name', 'country')
     list_filter = ('country',)
     ordering = ('name',)
-
 
 @admin.register(Car)
 class CarAdmin(admin.ModelAdmin):
@@ -20,13 +18,11 @@ class CarAdmin(admin.ModelAdmin):
     autocomplete_fields = ('brand',)
     ordering = ('-created_at',)
 
-
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
     list_display = ('id', 'full_name', 'position', 'phone')
     search_fields = ('full_name', 'position')
     list_filter = ('position',)
-
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -37,7 +33,6 @@ class OrderAdmin(admin.ModelAdmin):
     autocomplete_fields = ('car', 'manager')
     readonly_fields = ('created_at',)
     ordering = ('-created_at',)
-
 
 @admin.register(TestDrive)
 class TestDriveAdmin(admin.ModelAdmin):

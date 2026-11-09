@@ -1,74 +1,51 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Дом на Волге</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NIGHT CITY AUTOSALON{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'autosalon/style.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;900&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <script src="{% static 'app.js' %}"></script>
+    <script src="{% static 'autosalon/js/htmx.min.js' %}"></script>
+    <script src="{% static 'autosalon/js/json-enc.js' %}"></script>
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
+<header class="hud-header">
+    <div class="hud-logo">NIGHT CITY AUTOSALON</div>
+    <nav class="hud-nav">
+        <a href="{% url 'catalog_page' %}" class="hud-btn">Каталог</a>
+        <a href="/admin/" class="hud-btn hud-btn-danger">Админка</a>
+    </nav>
+</header>
+<main class="hud-main">{% block content %}{% endblock %}</main>
 
-    <!-- Шапка (как на скрине 1) -->
-    <header class="header">
-        <div class="logo">🏠 Дом на Волге</div>
-        <nav>
-            <a href="#">Главная</a>
-            <a href="#">Объекты</a>
-            <a href="#">Агенты</a>
-            <a href="#">Контакты</a>
-        </nav>
-        <div class="contact">+7 (831) 000-00-00</div>
-    </header>
-
-    <!-- Баннер с поиском -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Найдите свой<br>дом на Волге</h1>
-            <p>Квартиры в Нижнем Новгороде, дома и участки в Богородском районе.</p>
-            
-            <!-- Форма поиска (визуальная часть) -->
-            <div class="search-bar">
-                <input type="text" id="search-district" placeholder="Район или адрес">
-                <select id="search-type">
-                    <option value="">Любой тип</option>
-                    <option value="flat">Квартира</option>
-                    <option value="house">Дом</option>
-                </select>
-                <button onclick="loadProperties()">Найти</button>
+<!-- МОДАЛЬНОЕ ОКНО -->
+<div id="test-drive-modal" class="hud-modal-overlay" style="display: none;">
+    <div class="hud-modal">
+        <div class="hud-panel-title" style="justify-content: space-between;">
+            <span>Запись на тест-драйв</span>
+            <button type="button" id="close-modal-btn" class="hud-btn hud-btn-danger" style="padding: 4px 12px; font-size: 12px;">X</button>
+        </div>
+        <form id="test-drive-form">
+            <input type="hidden" id="td-car-id" name="car">
+            <div class="hud-field">
+                <label class="hud-label">Автомобиль</label>
+                <div id="td-car-name" style="color: var(--neon-cyan); font-weight: bold; margin-bottom: 10px;"></div>
             </div>
-        </div>
-        <div class="hero-image">
-            <!-- Сюда можно поставить фоновое фото дома -->
-            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3" alt="Дом">
-        </div>
-    </section>
-
-    <!-- Каталог объектов (как на скрине 2) -->
-    <section class="catalog">
-        <h2>Каталог объектов</h2>
-        <div class="filters">
-            <!-- Фильтры можно дублировать здесь -->
-             <span id="result-count">Найдено объектов: ...</span>
-        </div>
-
-        <div class="grid" id="property-grid">
-            <!-- Сюда JS будет вставлять карточки -->
-        </div>
-    </section>
-
-    <!-- Модальное окно заявки -->
-    <div id="request-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3>Записаться на просмотр</h3>
-            <form id="request-form">
-                <input type="hidden" id="prop-id" name="property">
-                <input type="text" id="name" placeholder="Ваше имя" required>
-                <input type="tel" id="phone" placeholder="Телефон" required>
-                <button type="submit">Отправить</button>
-            </form>
-        </div>
+            <div class="hud-field"><label class="hud-label" for="td-name">Имя</label><input class="hud-input" type="text" id="td-name" name="client_name" required></div>
+            <div class="hud-field"><label class="hud-label" for="td-phone">Телефон</label><input class="hud-input" type="text" id="td-phone" name="client_phone" required></div>
+            <div class="hud-field"><label class="hud-label" for="td-date">Дата и время</label><input class="hud-input" type="datetime-local" id="td-date" name="date_time" required style="color-scheme: dark;"></div>
+            <button type="submit" class="hud-btn" style="width: 100%; margin-top: 10px;">Записаться</button>
+        </form>
+        <div id="td-feedback" style="margin-top: 15px;"></div>
     </div>
-
-    <script src="app.js"></script>
+</div>
+<script src="{% static 'autosalon/js/app.js' %}"></script>
 </body>
 </html>

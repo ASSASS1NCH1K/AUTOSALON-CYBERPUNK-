@@ -1,6 +1,5 @@
 from django.db import models
 
-
 class Brand(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name='Марка')
     country = models.CharField(max_length=100, blank=True, verbose_name='Страна')
@@ -14,7 +13,6 @@ class Brand(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class Car(models.Model):
     STATUS_AVAILABLE = 'available'
@@ -45,7 +43,6 @@ class Car(models.Model):
     def __str__(self):
         return f'{self.brand.name} {self.model_name} ({self.year})'
 
-
 class Employee(models.Model):
     full_name = models.CharField(max_length=150, verbose_name='ФИО')
     position = models.CharField(max_length=100, verbose_name='Должность')
@@ -59,7 +56,6 @@ class Employee(models.Model):
 
     def __str__(self):
         return f'{self.full_name} ({self.position})'
-
 
 class Order(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='orders', verbose_name='Автомобиль')
@@ -75,7 +71,6 @@ class Order(models.Model):
 
     def __str__(self):
         return f'Заявка #{self.pk} — {self.customer_name} → {self.car}'
-
 
 class TestDrive(models.Model):
     STATUS_CHOICES = [

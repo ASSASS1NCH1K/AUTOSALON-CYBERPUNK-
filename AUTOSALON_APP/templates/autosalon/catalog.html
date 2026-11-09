@@ -1,87 +1,45 @@
 {% extends 'autosalon/base.html' %}
-
 {% block title %}Каталог — NIGHT CITY AUTOSALON{% endblock %}
-
 {% block content %}
 <div class="catalog-layout">
-
-    <!-- ЛЕВАЯ ПАНЕЛЬ: ФОРМА ЗАЯВКИ -->
     <aside class="hud-panel">
         <div class="hud-panel-title">Оформить заявку</div>
-
-        <form
-            id="order-form"
-            hx-post="/api/orders/"
-            hx-ext="json-enc"
-            hx-target="#order-feedback"
-            hx-swap="innerHTML"
-            hx-on::after-request="if(event.detail.successful) this.reset()"
-        >
+        <form id="order-form" hx-post="/api/orders/" hx-ext="json-enc" hx-target="#order-feedback" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful) this.reset()">
             <div class="hud-field">
                 <label class="hud-label" for="id_car">Автомобиль</label>
                 <select class="hud-select" id="id_car" name="car" required>
                     <option value="">— выберите из списка —</option>
                     {% for car in cars %}
-                        <option value="{{ car.id }}">
-                            #{{ car.id }} · {{ car.brand.name }} {{ car.model_name }} ({{ car.year }}) — {{ car.price }} ₽
-                        </option>
+                        <option value="{{ car.id }}">#{{ car.id }} · {{ car.brand.name }} {{ car.model_name }} ({{ car.year }}) — {{ car.price }} ₽</option>
                     {% endfor %}
                 </select>
             </div>
-
-            <div class="hud-field">
-                <label class="hud-label" for="id_name">Имя клиента</label>
-                <input class="hud-input" type="text" id="id_name" name="customer_name" placeholder="V. Silverhand" required maxlength="150">
-            </div>
-
-            <div class="hud-field">
-                <label class="hud-label" for="id_phone">Телефон</label>
-                <input class="hud-input" type="text" id="id_phone" name="customer_phone" placeholder="+7 900 000-00-00" required maxlength="30">
-            </div>
-
+            <div class="hud-field"><label class="hud-label" for="id_name">Имя клиента</label><input class="hud-input" type="text" id="id_name" name="customer_name" required maxlength="150"></div>
+            <div class="hud-field"><label class="hud-label" for="id_phone">Телефон</label><input class="hud-input" type="text" id="id_phone" name="customer_phone" required maxlength="30"></div>
             <div class="hud-row" style="margin-top: 20px;">
-                <button type="submit" class="hud-btn">
-                    Отправить
-                    <span class="htmx-indicator hud-scan" style="margin-left: 8px;">▮▮▮</span>
-                </button>
+                <button type="submit" class="hud-btn">Отправить<span class="htmx-indicator hud-scan" style="margin-left: 8px;">▮▮▮</span></button>
             </div>
         </form>
-
         <div id="order-feedback"></div>
     </aside>
-
-    <!-- ПРАВАЯ ПАНЕЛЬ: ВИТРИНА -->
     <section class="hud-panel">
         <div class="hud-row" style="margin-bottom: 20px;">
             <div class="hud-panel-title" style="margin-bottom: 0;">Каталог автомобилей</div>
             <div class="hud-spacer"></div>
-            <button id="load-cars-btn" class="hud-btn">
-                Обновить
-            </button>
+            <button id="load-cars-btn" class="hud-btn">Обновить</button>
         </div>
-
-        <div id="car-grid" class="car-grid">
-            <div class="hud-empty" style="grid-column: 1 / -1;">// ЗАГРУЗКА...</div>
-        </div>
+        <div id="car-grid" class="car-grid"><div class="hud-empty" style="grid-column: 1 / -1;">// ЗАГРУЗКА...</div></div>
     </section>
-
 </div>
-
 <script>
-    // Вывод ответа от DRF (через HTMX)
     document.body.addEventListener('htmx:afterRequest', function (evt) {
         const target = evt.detail.target;
         if (!target || target.id !== 'order-feedback') return;
-
-        let html = '';
-        const xhr = evt.detail.xhr;
-
+        let html = ''; const xhr = evt.detail.xhr;
         try {
             const data = JSON.parse(xhr.responseText);
             if (xhr.status >= 200 && xhr.status < 300) {
-                html = '<div class="hud-message">▮ ЗАЯВКА ПРИНЯТА. ID: #' +
-                       data.id + ' · ' + (data.car_info ? data.car_info.brand_name + ' ' + data.car_info.model_name : '') +
-                       '</div>';
+                html = '<div class="hud-message">▮ ЗАЯВКА ПРИНЯТА. ID: #' + data.id + '</div>';
             } else {
                 let errs = '';
                 if (data && typeof data === 'object') {
@@ -92,10 +50,7 @@
                 }
                 html = '<div class="hud-message hud-message-error">▮ ОШИБКА: ' + (errs || xhr.status) + '</div>';
             }
-        } catch (e) {
-            html = '<div class="hud-message hud-message-error">▮ СЕРВЕР НЕ ОТВЕТИЛ</div>';
-        }
-
+        } catch (e) { html = '<div class="hud-message hud-message-error">▮ СЕРВЕР НЕ ОТВЕТИЛ</div>'; }
         target.innerHTML = html;
     });
 </script>
