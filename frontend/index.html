@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NIGHT CITY AUTOSALON</title>
-    <!-- Подключаем шрифты и CSS (путь к css у тебя правильный) -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;900&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="static/autosalon/style.css">
 </head>
@@ -19,83 +18,204 @@
 </header>
 
 <main class="hud-main">
-    <section class="hud-panel">
-        <div class="hud-row" style="margin-bottom: 20px;">
-            <div class="hud-panel-title" style="margin-bottom: 0;">Каталог автомобилей</div>
-        </div>
-        
-        <div id="car-grid" class="car-grid">
-            <!-- Сюда JS будет вставлять карточки машин -->
-        </div>
-    </section>
+    <div class="catalog-layout">
+        <!-- ЛЕВАЯ ПАНЕЛЬ: ФОРМА ЗАЯВКИ -->
+        <aside class="hud-panel">
+            <div class="hud-panel-title">Оформить заявку</div>
+            <form id="order-form">
+                <div class="hud-field">
+                    <label class="hud-label" for="id_car">Автомобиль</label>
+                    <select class="hud-select" id="id_car" name="car" required>
+                        <option value="">— выберите из списка —</option>
+                    </select>
+                </div>
+                <div class="hud-field">
+                    <label class="hud-label" for="id_name">Имя клиента</label>
+                    <input class="hud-input" type="text" id="id_name" name="customer_name" placeholder="V. Silverhand" required>
+                </div>
+                <div class="hud-field">
+                    <label class="hud-label" for="id_phone">Телефон</label>
+                    <input class="hud-input" type="text" id="id_phone" name="customer_phone" placeholder="+7 900 000-00-00" required>
+                </div>
+                <div class="hud-row" style="margin-top: 20px;">
+                    <button type="submit" class="hud-btn">Отправить</button>
+                </div>
+            </form>
+            <div id="order-feedback"></div>
+        </aside>
+
+        <!-- ПРАВАЯ ПАНЕЛЬ: КАТАЛОГ -->
+        <section class="hud-panel">
+            <div class="hud-row" style="margin-bottom: 20px;">
+                <div class="hud-panel-title" style="margin-bottom: 0;">Каталог автомобилей</div>
+            </div>
+            <div id="car-grid" class="car-grid"></div>
+        </section>
+    </div>
 </main>
 
+<!-- МОДАЛЬНОЕ ОКНО ДЛЯ ТЕСТ-ДРАЙВА -->
+<div id="testdrive-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="hud-panel" style="width: 400px; margin: 0 auto; position: relative;">
+        <div class="hud-panel-title">Запись на тест-драйв</div>
+        <form id="testdrive-form">
+            <input type="hidden" id="td_car_id">
+            <div class="hud-field">
+                <label class="hud-label">Имя клиента</label>
+                <input class="hud-input" type="text" id="td_name" required>
+            </div>
+            <div class="hud-field">
+                <label class="hud-label">Телефон</label>
+                <input class="hud-input" type="text" id="td_phone" required>
+            </div>
+            <!-- Поле для ввода даты в русском формате -->
+            <div class="hud-field">
+                <label class="hud-label">Дата и время</label>
+                <input class="hud-input" type="text" id="td_date" placeholder="ДД.ММ.ГГГГ ЧЧ:ММ" required>
+            </div>
+            <div class="hud-row" style="margin-top: 20px;">
+                <button type="submit" class="hud-btn">Отправить</button>
+                <button type="button" class="hud-btn hud-btn-danger" onclick="document.getElementById('testdrive-modal').style.display='none'">Отмена</button>
+            </div>
+        </form>
+        <div id="td-feedback" style="margin-top: 10px;"></div>
+    </div>
+</div>
+
 <script>
+    const API_URL = 'http://127.0.0.1:8000/api/v1';
+    let carsData = []; 
+
+    // Преобразуем "18.11.2026 14:30" в "2026-11-18T14:30:00"
+    function parseRussianDate(inputStr) {
+        const match = inputStr.match(/^(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}):(\d{2})$/);
+        if (!match) return null;
+        const [_, day, month, year, hours, minutes] = match;
+        return `${year}-${month}-${day}T${hours}:${minutes}:00`;
+    }
+
+    // Загрузка машин
     async function loadCars() {
         try {
-            // Запрос к API Django
-            const response = await fetch('http://127.0.0.1:8000/api/v1/cars/');
-            const cars = await response.json();
-            
+            const response = await fetch(`${API_URL}/cars/`);
+            carsData = await response.json();
             const grid = document.getElementById('car-grid');
+            const select = document.getElementById('id_car');
             grid.innerHTML = '';
+            select.innerHTML = '<option value="">— выберите из списка —</option>';
 
-            cars.forEach(car => {
-                // Формируем HTML точно как в car_cards.html
-                // Если картинка есть, Django отдает её URL (image), если нет - ставим заглушку
-                let imageHtml = '';
-                if (car.image) {
-                    // Если картинка пришла с полным путем (http...), используем как есть, иначе склеиваем с портом 8000
-                    const imgUrl = car.image.startsWith('http') ? car.image : 'http://127.0.0.1:8000' + car.image;
-                    imageHtml = `<img src="${imgUrl}" alt="${car.brand_name} ${car.model_name}">`;
-                } else {
-                    imageHtml = `<div class="car-image-placeholder">NO IMAGE</div>`;
-                }
+            carsData.forEach(car => {
+                select.innerHTML += `<option value="${car.id}">#${car.id} · ${car.brand_name} ${car.model_name} — ${car.price} ₽</option>`;
 
+                let imgUrl = car.image ? (car.image.startsWith('http') ? car.image : 'http://127.0.0.1:8000' + car.image) : '';
+                let imgHtml = imgUrl ? `<img src="${imgUrl}">` : `<div class="car-image-placeholder">NO IMAGE</div>`;
+                
                 const card = `
                     <article class="car-card">
-                        <div class="car-image-wrap">
-                            ${imageHtml}
-                            <span class="car-card-id">ID #${car.id}</span>
-                        </div>
-
+                        <div class="car-image-wrap">${imgHtml}<span class="car-card-id">ID #${car.id}</span></div>
                         <div class="car-body">
-                            <div class="car-title">
-                                <span class="car-brand">${car.brand_name}</span><br>
-                                ${car.model_name}
-                            </div>
-
+                            <div class="car-title"><span class="car-brand">${car.brand_name}</span><br>${car.model_name}</div>
                             <div class="car-specs">
-                                <div class="car-spec-row">
-                                    <span class="car-spec-key">Год</span>
-                                    <span class="car-spec-value">${car.year}</span>
-                                </div>
-                                <div class="car-spec-row">
-                                    <span class="car-spec-key">Цвет</span>
-                                    <span class="car-spec-value">${car.color}</span>
-                                </div>
-                                <div class="car-spec-row">
-                                    <span class="car-spec-key">Статус</span>
-                                    <span class="car-spec-value">
-                                        <span class="status-badge status-${car.status}">${car.status_display}</span>
-                                    </span>
-                                </div>
+                                <div class="car-spec-row"><span class="car-spec-key">Год</span><span class="car-spec-value">${car.year}</span></div>
+                                <div class="car-spec-row"><span class="car-spec-key">Цвет</span><span class="car-spec-value">${car.color}</span></div>
+                                <div class="car-spec-row"><span class="car-spec-key">Статус</span><span class="car-spec-value"><span class="status-badge status-${car.status}">${car.status_display}</span></span></div>
                             </div>
-
                             <div class="car-price">${car.price} ₽</div>
-                            
-                            <button class="hud-btn" style="margin-top: 10px; width: 100%;">ТЕСТ-ДРАЙВ</button>
+                            <button class="hud-btn" style="margin-top: 10px; width: 100%;" onclick="openTestDrive(${car.id})">ТЕСТ-ДРАЙВ</button>
                         </div>
                     </article>
                 `;
                 grid.innerHTML += card;
             });
         } catch (error) {
-            console.error("Ошибка при загрузке API:", error);
-            document.getElementById('car-grid').innerHTML = `<div class="hud-empty">ОШИБКА ЗАГРУЗКИ ДАННЫХ</div>`;
+            console.error("Ошибка загрузки:", error);
         }
     }
-    
+
+    // Отправка Заявки (левая форма)
+    document.getElementById('order-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const feedback = document.getElementById('order-feedback');
+        const data = {
+            car: document.getElementById('id_car').value,
+            customer_name: document.getElementById('id_name').value,
+            customer_phone: document.getElementById('id_phone').value
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/orders/`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            
+            if (response.ok) {
+                feedback.innerHTML = `<div class="hud-message">▮ ЗАЯВКА ПРИНЯТА. ID: #${result.id}</div>`;
+                e.target.reset();
+            } else {
+                feedback.innerHTML = `<div class="hud-message hud-message-error">▮ ОШИБКА: ${JSON.stringify(result)}</div>`;
+            }
+        } catch (error) {
+            feedback.innerHTML = `<div class="hud-message hud-message-error">▮ СЕРВЕР НЕ ОТВЕТИЛ</div>`;
+        }
+    });
+
+    // Открытие модального окна Тест-драйва
+    window.openTestDrive = function(carId) {
+        document.getElementById('td_car_id').value = carId;
+        document.getElementById('testdrive-modal').style.display = 'flex';
+        document.getElementById('td-feedback').innerHTML = '';
+        document.getElementById('testdrive-form').reset();
+    };
+
+    // Отправка Тест-драйва
+    document.getElementById('testdrive-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const carId = document.getElementById('td_car_id').value;
+        const name = document.getElementById('td_name').value;
+        const phone = document.getElementById('td_phone').value;
+        const rawDate = document.getElementById('td_date').value;
+        const feedback = document.getElementById('td-feedback');
+
+        // Конвертируем русскую дату в машинный формат
+        const formattedDate = parseRussianDate(rawDate);
+        
+        if (!formattedDate) {
+            feedback.innerHTML = `<div class="hud-message hud-message-error">▮ ОШИБКА: Неверный формат. Введите ДД.ММ.ГГГГ ЧЧ:ММ (например, 18.11.2026 14:30)</div>`;
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/test-drives/`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    car: carId,
+                    client_name: name,
+                    client_phone: phone,
+                    date_time: formattedDate, // Отправляем в формате 2026-11-18T14:30:00
+                    status: 'pending'
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                feedback.innerHTML = `<div class="hud-message">▮ ЗАЯВКА ПРИНЯТА!</div>`;
+                setTimeout(() => {
+                    document.getElementById('testdrive-modal').style.display = 'none';
+                }, 2000);
+            } else {
+                feedback.innerHTML = `<div class="hud-message hud-message-error">▮ ОШИБКА: ${JSON.stringify(result)}</div>`;
+            }
+        } catch (error) {
+            feedback.innerHTML = `<div class="hud-message hud-message-error">▮ СЕРВЕР НЕ ОТВЕТИЛ</div>`;
+        }
+    });
+
+    // Запуск
     loadCars();
 </script>
 </body>
