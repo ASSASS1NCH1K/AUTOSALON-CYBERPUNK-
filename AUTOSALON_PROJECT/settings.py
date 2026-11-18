@@ -34,7 +34,7 @@ ROOT_URLCONF = 'AUTOSALON_PROJECT.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'frontend' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -94,6 +94,6 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+      BASE_DIR / 'frontend' / 'static',
 ]
 CORS_ALLOW_ALL_ORIGINS = True

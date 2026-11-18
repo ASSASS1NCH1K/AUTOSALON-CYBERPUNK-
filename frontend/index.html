@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIGHT CITY AUTOSALON</title>
+    <!-- Подключаем шрифты и CSS (путь к css у тебя правильный) -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;900&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/autosalon/style.css">
+</head>
+<body>
+
+<header class="hud-header">
+    <div class="hud-logo">NIGHT CITY AUTOSALON</div>
+    <nav class="hud-nav">
+        <a href="#" class="hud-btn">Каталог</a>
+        <a href="http://127.0.0.1:8000/admin/" class="hud-btn hud-btn-danger">Админка</a>
+    </nav>
+</header>
+
+<main class="hud-main">
+    <section class="hud-panel">
+        <div class="hud-row" style="margin-bottom: 20px;">
+            <div class="hud-panel-title" style="margin-bottom: 0;">Каталог автомобилей</div>
+        </div>
+        
+        <div id="car-grid" class="car-grid">
+            <!-- Сюда JS будет вставлять карточки машин -->
+        </div>
+    </section>
+</main>
+
+<script>
+    async function loadCars() {
+        try {
+            // Запрос к API Django
+            const response = await fetch('http://127.0.0.1:8000/api/v1/cars/');
+            const cars = await response.json();
+            
+            const grid = document.getElementById('car-grid');
+            grid.innerHTML = '';
+
+            cars.forEach(car => {
+                // Формируем HTML точно как в car_cards.html
+                // Если картинка есть, Django отдает её URL (image), если нет - ставим заглушку
+                let imageHtml = '';
+                if (car.image) {
+                    // Если картинка пришла с полным путем (http...), используем как есть, иначе склеиваем с портом 8000
+                    const imgUrl = car.image.startsWith('http') ? car.image : 'http://127.0.0.1:8000' + car.image;
+                    imageHtml = `<img src="${imgUrl}" alt="${car.brand_name} ${car.model_name}">`;
+                } else {
+                    imageHtml = `<div class="car-image-placeholder">NO IMAGE</div>`;
+                }
+
+                const card = `
+                    <article class="car-card">
+                        <div class="car-image-wrap">
+                            ${imageHtml}
+                            <span class="car-card-id">ID #${car.id}</span>
+                        </div>
+
+                        <div class="car-body">
+                            <div class="car-title">
+                                <span class="car-brand">${car.brand_name}</span><br>
+                                ${car.model_name}
+                            </div>
+
+                            <div class="car-specs">
+                                <div class="car-spec-row">
+                                    <span class="car-spec-key">Год</span>
+                                    <span class="car-spec-value">${car.year}</span>
+                                </div>
+                                <div class="car-spec-row">
+                                    <span class="car-spec-key">Цвет</span>
+                                    <span class="car-spec-value">${car.color}</span>
+                                </div>
+                                <div class="car-spec-row">
+                                    <span class="car-spec-key">Статус</span>
+                                    <span class="car-spec-value">
+                                        <span class="status-badge status-${car.status}">${car.status_display}</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="car-price">${car.price} ₽</div>
+                            
+                            <button class="hud-btn" style="margin-top: 10px; width: 100%;">ТЕСТ-ДРАЙВ</button>
+                        </div>
+                    </article>
+                `;
+                grid.innerHTML += card;
+            });
+        } catch (error) {
+            console.error("Ошибка при загрузке API:", error);
+            document.getElementById('car-grid').innerHTML = `<div class="hud-empty">ОШИБКА ЗАГРУЗКИ ДАННЫХ</div>`;
+        }
+    }
+    
+    loadCars();
+</script>
+</body>
+</html>
